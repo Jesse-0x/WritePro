@@ -20,7 +20,7 @@ def read_root():
 
 
 @app.post("/api/dialog")
-def dialog(user_prompt: str):
+def grammar_check(user_prompt: str):
     message = [
             {
                 "role": "system",
@@ -51,3 +51,4 @@ def dialog(user_prompt: str):
         messages=message,
     )
     return assistant_prompt["choices"][0]["message"]["content"]
+
