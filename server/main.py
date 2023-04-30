@@ -2,17 +2,28 @@ import openai
 import fastapi
 import uvicorn
 import json
-import os
 import redis
 import nanoid
+from pydantic import BaseModel
 
 from system import *
 from utils import *
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = open('/Users/jesse/.env').read().strip()
 redis = redis.Redis(host='localhost', port=6379, db=0)
 
 app = fastapi.FastAPI()
+
+
+class Suggestion(BaseModel):
+    app_id: str
+    user_prompt: str
+
+
+class DialogueModel(BaseModel):
+    app_id: str
+    index: int
+    user_feedback: str
 
 
 @app.get("/")
@@ -22,14 +33,17 @@ def read_root():
 
 @app.get("/api/app_id")
 def read_app_id():
-    app_id = nanoid.generate(size=32)
+    app_id = nanoid.generate(size=32, alphabet='0123456789abcdefghijklmnopqrstuvwxyz_')
     redis.rpush('app_id_list', app_id)
     return {"app_id": app_id}
 
 
 @app.post("/api/suggestions")
-def grammar_check(app_id: str, user_prompt: str):
-    if bytes(app_id, 'utf-8') not in redis.lrange('app_id_list', 0, -1): return {"error": "Current page is not valid. Please refresh the page."}
+def grammar_check(suggestion: Suggestion):
+    app_id = suggestion.app_id
+    user_prompt = suggestion.user_prompt
+    if bytes(app_id, 'utf-8') not in redis.lrange('app_id_list', 0, -1): return {
+        "error": "Current page is not valid. Please refresh the page."}
     if not isinstance(user_prompt, str): return {"error": "The input text is not valid."}
     if len(user_prompt) == 0: return {"error": "The input is not valid."}
     message = [
@@ -65,10 +79,9 @@ def grammar_check(app_id: str, user_prompt: str):
         result = json.loads(assistant_prompt["choices"][0]["message"]["content"])
         result = json_check(result)
         if len(result) == 0: return {"error": "The model failed to generate a response. Please try again."}
-        if result.keys() == {"error"}: return {"error": "The model failed to generate a response. Please try again."}
-    except:
+        if isinstance(result, dict) and {"error"} in result: return result
+    except KeyError:
         return {"error": "The model failed to generate a response. Please try again."}
-
     for item in result:
         redis.rpush(app_id, json.dumps(item))
     redis.set(app_id + "_text", user_prompt)
@@ -76,19 +89,26 @@ def grammar_check(app_id: str, user_prompt: str):
 
 
 @app.post("/api/dialogue")
-def dialogue(app_id: str, user_feedback: str, index: int):
+def dialogue(dialogue_feedback: DialogueModel):
+    issue_id = dialogue_feedback.index
+    user_feedback = dialogue_feedback.user_feedback
+    app_id = dialogue_feedback.app_id
     if not redis.exists(app_id): return {"error": "Current page is not valid. Please refresh the page."}
-    if not isinstance(index, int) or index < 0 or index >= redis.llen(app_id): return {"error": "The index is not valid."}
+    if not isinstance(issue_id, int) or issue_id < 0 or issue_id >= redis.llen(app_id): return {"error": "The input is not valid."}
     if not isinstance(user_feedback, str) or len(user_feedback) == 0: return {"error": "The input is not valid."}
+    issue = json.loads(redis.lindex(app_id, issue_id))
     message = [
         {
             "role": "system",
-            "content": get_feedback_system(redis.lindex(app_id, index), redis.get(app_id + "_text"))
+            "content": get_feedback_system(issue)
         }
     ]
     previous_dialogues = redis.lrange(app_id + "_feedback", 0, -1)
-    for dialogue in previous_dialogues:
-        message.append(json.loads(dialogue))
+    for pre_dialogue in previous_dialogues:
+        messages = json.loads(pre_dialogue)
+        message.append({"role": "user", "content": messages["feedback"]})
+        message.append({"role": "assistant", "content": messages["assistant"]})
+
     message.append(
         {
             "role": "user",
@@ -96,6 +116,7 @@ def dialogue(app_id: str, user_feedback: str, index: int):
         }
     )
     token_size = num_tokens_from_messages(message)
+    print(token_size, message)
     if token_size > 4096:
         return {"error": "The input text is too long. Please try again."}
     assistant_prompt = openai.ChatCompletion.create(
@@ -104,9 +125,13 @@ def dialogue(app_id: str, user_feedback: str, index: int):
         max_tokens=4095 - token_size,
         messages=message,
     )
-    result = {"index": index, "feedback": assistant_prompt["choices"][0]["text"]}
-    dialogues = {"index": index, "feedback": user_feedback, "assistant": assistant_prompt["choices"][0]["text"]}
+    result = {"issue_id": issue_id, "feedback": assistant_prompt["choices"][0]["message"]["content"]}
+    dialogues = {"issue_id": issue_id, "feedback": user_feedback, "assistant": assistant_prompt["choices"][0]["message"]["content"]}
     redis.rpush(app_id + "_feedback", json.dumps(dialogues))
     return result
 
 
+if __name__ == "__main__":
+    uvicorn.run(app, host="localhost",
+                port=8000,
+                workers=1)
