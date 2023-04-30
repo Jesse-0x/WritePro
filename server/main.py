@@ -12,10 +12,18 @@ from fastapi.staticfiles import StaticFiles
 from system import *
 from utils import *
 
-openai.api_key = open('../.env').read().strip()
+openai.api_key = os.getenv('OPENAI_API_KEY')
 redis = redis.Redis(host='localhost', port=6379, db=0)
 
 app = fastapi.FastAPI()
+app.mount("/", StaticFiles(directory="public", html=True), name="static")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class Suggestion(BaseModel):
@@ -36,7 +44,7 @@ class CompletionModel(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"Welcome to the Grammar Assistant API!"}
+    return fastapi.responses.RedirectResponse(url='/index.html')
 
 
 @app.get("/api/app_id")
@@ -101,8 +109,10 @@ def dialogue(dialogue_feedback: DialogueModel):
     issue_id = dialogue_feedback.index
     user_feedback = dialogue_feedback.user_feedback
     app_id = dialogue_feedback.app_id
-    if not redis.exists(app_id): return {"error": "Current page is not valid. Please refresh the page.", "new_app_id": True}
-    if not isinstance(issue_id, int) or issue_id < 0 or issue_id >= redis.llen(app_id): return {"error": "The input is not valid."}
+    if not redis.exists(app_id): return {"error": "Current page is not valid. Please refresh the page.",
+                                         "new_app_id": True}
+    if not isinstance(issue_id, int) or issue_id < 0 or issue_id >= redis.llen(app_id): return {
+        "error": "The input is not valid."}
     if not isinstance(user_feedback, str) or len(user_feedback) == 0: return {"error": "The input is not valid."}
     issue = json.loads(redis.lindex(app_id, issue_id))
     message = [
@@ -134,14 +144,16 @@ def dialogue(dialogue_feedback: DialogueModel):
         messages=message,
     )
     result = {"issue_id": issue_id, "feedback": assistant_prompt["choices"][0]["message"]["content"]}
-    dialogues = {"issue_id": issue_id, "feedback": user_feedback, "assistant": assistant_prompt["choices"][0]["message"]["content"]}
+    dialogues = {"issue_id": issue_id, "feedback": user_feedback,
+                 "assistant": assistant_prompt["choices"][0]["message"]["content"]}
     redis.rpush(app_id + "_feedback", json.dumps(dialogues))
     return result
 
 
 @app.get("/api/get/{app_id}")
 def get_content(app_id: str):
-    if not redis.exists(app_id): return {"error": "Current page is not valid. Please refresh the page.", "new_app_id": True}
+    if not redis.exists(app_id): return {"error": "Current page is not valid. Please refresh the page.",
+                                         "new_app_id": True}
     text = redis.get(app_id + "_text").decode("utf-8")
     feedback = redis.lrange(app_id + "_feedback", 0, -1)
     result = []
@@ -154,7 +166,8 @@ def get_content(app_id: str):
 def completion(_completion: CompletionModel):
     app_id = _completion.app_id
     user_text = _completion.user_text
-    if not redis.exists(app_id): return {"error": "Current page is not valid. Please refresh the page.", "new_app_id": True}
+    if not redis.exists(app_id): return {"error": "Current page is not valid. Please refresh the page.",
+                                         "new_app_id": True}
     if not isinstance(user_text, str) or len(user_text) == 0: return {"error": "The input is not valid."}
     enc = tiktoken.get_encoding('cl100k_base')
     token_size = len(enc.encode(user_text))
@@ -164,19 +177,3 @@ def completion(_completion: CompletionModel):
         max_tokens=3999 - token_size,
     )
     return {"result": result['choices'][0]['text']}
-
-
-if __name__ == "__main__":
-    # static files
-    app.mount("/static", StaticFiles(directory="static"), name="static")
-    # CORS
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-    uvicorn.run(app, host="localhost",
-                port=os.getenv("PORT", 8000),
-                workers=1)
