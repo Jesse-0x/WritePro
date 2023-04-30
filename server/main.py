@@ -11,7 +11,7 @@ import tiktoken
 from system import *
 from utils import *
 
-openai.api_key = open('/Users/jesse/.env').read().strip()
+openai.api_key = open('.env').read().strip()
 redis = redis.Redis(host='localhost', port=6379, db=0)
 
 app = fastapi.FastAPI()
