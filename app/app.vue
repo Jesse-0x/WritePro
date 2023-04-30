@@ -52,7 +52,7 @@ let content: any = ""
 
 onMounted(async () => {
   await getSuggestions()
-  await useFetch(`${appConfig.url}/api`, {
+  await useFetch(`${appConfig.url}/api/app_id`, {
     method: "GET",
     onResponse({response}) {
       app.value = response._data.app_id
@@ -66,8 +66,8 @@ async function getSuggestions() {
   await useFetch(`${appConfig.url}/api/suggestions`, {
     method: "POST",
     body: {
-      app: app.value,
-      content: content
+      app_id: app.value,
+      user_prompt: content
     },
     onResponse({response}) {
       suggestions.value = response._data

@@ -6,12 +6,13 @@ import json
 import redis
 import nanoid
 from pydantic import BaseModel
-import tiktoken
+from starlette.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from system import *
 from utils import *
 
-openai.api_key = open('.env').read().strip()
+openai.api_key = open('../.env').read().strip()
 redis = redis.Redis(host='localhost', port=6379, db=0)
 
 app = fastapi.FastAPI()
@@ -50,7 +51,7 @@ def grammar_check(suggestion: Suggestion):
     app_id = suggestion.app_id
     user_prompt = suggestion.user_prompt
     if bytes(app_id, 'utf-8') not in redis.lrange('app_id_list', 0, -1): return {
-        "error": "Current page is not valid. Please refresh the page."}
+        "error": "Current page is not valid. Please refresh the page.", "new_app_id": True}
     if not isinstance(user_prompt, str): return {"error": "The input text is not valid."}
     if len(user_prompt) == 0: return {"error": "The input is not valid."}
     message = [
@@ -100,7 +101,7 @@ def dialogue(dialogue_feedback: DialogueModel):
     issue_id = dialogue_feedback.index
     user_feedback = dialogue_feedback.user_feedback
     app_id = dialogue_feedback.app_id
-    if not redis.exists(app_id): return {"error": "Current page is not valid. Please refresh the page."}
+    if not redis.exists(app_id): return {"error": "Current page is not valid. Please refresh the page.", "new_app_id": True}
     if not isinstance(issue_id, int) or issue_id < 0 or issue_id >= redis.llen(app_id): return {"error": "The input is not valid."}
     if not isinstance(user_feedback, str) or len(user_feedback) == 0: return {"error": "The input is not valid."}
     issue = json.loads(redis.lindex(app_id, issue_id))
@@ -166,6 +167,16 @@ def completion(_completion: CompletionModel):
 
 
 if __name__ == "__main__":
+    # static files
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    # CORS
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     uvicorn.run(app, host="localhost",
                 port=os.getenv("PORT", 8000),
                 workers=1)
