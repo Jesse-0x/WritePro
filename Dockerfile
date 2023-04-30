@@ -6,7 +6,7 @@ COPY ./server /app
 
 RUN pip install -r requirements.txt
 RUN apt update && apt install -y redis-server
-# environment variables PORT
-EXPOSE
+# environment variables PORT in Heroku
+ENV PORT=5000
 
 CMD ["python", "main.py"]
