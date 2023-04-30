@@ -115,3 +115,13 @@ user_end = """
 $&$&$&$
 """
 
+
+def get_user_guidance(input_text):
+    return user_guidance + input_text + user_end
+
+
+def get_feedback_system(issue, text):
+    return f"""
+    """
+
+
