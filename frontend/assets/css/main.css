@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply bg-slate-50;
+    @apply text-gray-600;
+    font-family: Inter, sans-serif;
+}
