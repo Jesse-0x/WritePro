@@ -1,0 +1,6 @@
+openai
+FastAPI
+uvicorn
+redis
+nanoid
+tiktoken

@@ -1,3 +1,4 @@
+import os
 import openai
 import fastapi
 import uvicorn
@@ -5,6 +6,7 @@ import json
 import redis
 import nanoid
 from pydantic import BaseModel
+import tiktoken
 
 from system import *
 from utils import *
@@ -24,6 +26,11 @@ class DialogueModel(BaseModel):
     app_id: str
     index: int
     user_feedback: str
+
+
+class CompletionModel(BaseModel):
+    app_id: str
+    user_text: str
 
 
 @app.get("/")
@@ -131,7 +138,34 @@ def dialogue(dialogue_feedback: DialogueModel):
     return result
 
 
+@app.get("/api/get/{app_id}")
+def get_content(app_id: str):
+    if not redis.exists(app_id): return {"error": "Current page is not valid. Please refresh the page.", "new_app_id": True}
+    text = redis.get(app_id + "_text").decode("utf-8")
+    feedback = redis.lrange(app_id + "_feedback", 0, -1)
+    result = []
+    for item in feedback:
+        result.append(json.loads(item))
+    return {"text": text, "feedback": result}
+
+
+@app.post("/api/completion")
+def completion(_completion: CompletionModel):
+    app_id = _completion.app_id
+    user_text = _completion.user_text
+    if not redis.exists(app_id): return {"error": "Current page is not valid. Please refresh the page.", "new_app_id": True}
+    if not isinstance(user_text, str) or len(user_text) == 0: return {"error": "The input is not valid."}
+    enc = tiktoken.get_encoding('cl100k_base')
+    token_size = len(enc.encode(user_text))
+    result = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=user_text,
+        max_tokens=3999 - token_size,
+    )
+    return {"result": result['choices'][0]['text']}
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="localhost",
-                port=8000,
+                port=os.getenv("PORT", 8000),
                 workers=1)
