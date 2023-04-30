@@ -39,14 +39,16 @@ Sarah
 assistant_guide_feedback1_depressed = """
 [
     {
+      "index": 0,
       "category": "spelling",
       "position_index": 10,
       "position_end": 13,
       "incorrect": "your",
       "fix": "you're",
-      "reason": "Correcting a common spelling error; 'your' should be replaced with 'you're'."
+      "reason": "Correcting a common *spelling error*; 'your' should be replaced with 'you're'."
     },
     {
+      "index": 1,
       "category": "spelling",
       "position_index": 15,
       "position_end": 22,
@@ -55,6 +57,7 @@ assistant_guide_feedback1_depressed = """
       "reason": "Suggesting a more complete phrase to replace the incomplete phrase 'doing'."
     },
     {
+      "index": 2,
       "category": "grammar",
       "position_index": 56,
       "position_end": 61,
@@ -63,6 +66,7 @@ assistant_guide_feedback1_depressed = """
       "reason": "Correcting a common homophone error; 'their' should be replaced with 'there'."
     },
     {
+      "index": 3,
       "category": "grammar",
       "position_index": 72,
       "position_end": 78,
@@ -71,6 +75,7 @@ assistant_guide_feedback1_depressed = """
       "reason": "Correcting an incorrect use of modal verb; 'should' should be replaced with 'will'."
     },
     {
+      "index": 4,
       "category": "punctuation",
       "position_index": 92,
       "position_end": 92,
@@ -79,6 +84,7 @@ assistant_guide_feedback1_depressed = """
       "reason": "Correcting a punctuation error; ',' should be replaced with '.' to end the sentence."
     },
     {
+      "index": 5,
       "category": "tone",
       "position_index": 30,
       "position_end": 30,
@@ -87,6 +93,7 @@ assistant_guide_feedback1_depressed = """
       "reason": "Suggesting the removal of a comma to improve the tone of the message."
     },
     {
+      "index": 6,
       "category": "logic",
       "position_index": 98,
       "position_end": 117,
@@ -96,4 +103,15 @@ assistant_guide_feedback1_depressed = """
     }
 ]
 """
-assistant_guide_feedback1 = """[{"category":"spelling","position_index":10,"position_end":13,"incorrect":"your","fix":"you're","reason":"Correcting a common spelling error; 'your' should be replaced with 'you're'."},{"category":"spelling","position_index":15,"position_end":22,"incorrect":"doing","fix":"doing well","reason":"Suggesting a more complete phrase to replace the incomplete phrase 'doing'."},{"category":"grammar","position_index":56,"position_end":61,"incorrect":"their","fix":"there","reason":"Correcting a common homophone error; 'their' should be replaced with 'there'."},{"category":"grammar","position_index":72,"position_end":78,"incorrect":"should","fix":"will","reason":"Correcting an incorrect use of modal verb; 'should' should be replaced with 'will'."},{"category":"punctuation","position_index":92,"position_end":92,"incorrect":",","fix":".","reason":"Correcting a punctuation error; ',' should be replaced with '.' to end the sentence."},{"category":"tone","position_index":30,"position_end":30,"incorrect":",","fix":"","reason":"Suggesting the removal of a comma to improve the tone of the message."},{"category":"logic","position_index":98,"position_end":117,"incorrect":"anything else you need to know","fix":"if there is anything else you need to know","reason":"Suggesting a more clear and concise phrase to replace the wordy and unclear phrase 'anything else you need to know'."}]"""
+assistant_guide_feedback1 = """[{"index":0,"category":"spelling","position_index":10,"position_end":13,"incorrect":"your","fix":"you're","reason":"Correcting a common *spelling error*; 'your' should be replaced with 'you're'."},{"index":1,"category":"spelling","position_index":15,"position_end":22,"incorrect":"doing","fix":"doing well","reason":"Suggesting a more complete phrase to replace the incomplete phrase 'doing'."},{"index":2,"category":"grammar","position_index":56,"position_end":61,"incorrect":"their","fix":"there","reason":"Correcting a common homophone error; 'their' should be replaced with 'there'."},{"index":3,"category":"grammar","position_index":72,"position_end":78,"incorrect":"should","fix":"will","reason":"Correcting an incorrect use of modal verb; 'should' should be replaced with 'will'."},{"index":4,"category":"punctuation","position_index":92,"position_end":92,"incorrect":",","fix":".","reason":"Correcting a punctuation error; ',' should be replaced with '.' to end the sentence."},{"index":5,"category":"tone","position_index":30,"position_end":30,"incorrect":",","fix":"","reason":"Suggesting the removal of a comma to improve the tone of the message."},{"index":6,"category":"logic","position_index":98,"position_end":117,"incorrect":"anything else you need to know","fix":"if there is anything else you need to know","reason":"Suggesting a more clear and concise phrase to replace the wordy and unclear phrase 'anything else you need to know'."}]"""
+
+user_guidance = """
+Everything inside the $&$&$&$ is the user input. 
+$&$&$&$
+
+"""
+
+user_end = """
+$&$&$&$
+"""
+

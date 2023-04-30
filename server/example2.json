@@ -6,7 +6,7 @@
       "position_end": 13,
       "incorrect": "your",
       "fix": "you're",
-      "reason": "Correcting a common spelling error; 'your' should be replaced with 'you're'."
+      "reason": "Correcting a common *spelling error*; 'your' should be replaced with 'you're'."
     },
     {
       "index": 1,

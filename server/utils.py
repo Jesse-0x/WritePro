@@ -1,9 +1,4 @@
-import openai
 import tiktoken
-import json
-import os
-
-from system import *
 
 
 def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301"):
@@ -24,3 +19,22 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0301"):
         return num_tokens
     else:
         raise NotImplementedError
+
+
+def json_check(json_file):
+    """Checks if the output following the JSON format that I want."""
+    if not isinstance(json_file, list): return {"error": "The output is not a list."}
+    for item in json_file:
+        if not isinstance(item, dict): json_file.remove(item)
+        if item.keys() != {"category", "position_index", "position_end", "incorrect", "fix", "reason"}: json_file.remove(item)
+        if item['category'] not in {"spelling", "grammar", "punctuation", "tone", "logic"}: json_file.remove(item)
+        if not isinstance(item["category"], str): item["category"] = str(item["category"])
+        if not isinstance(item["position_index"], int): json_file.remove(item)
+        if not isinstance(item["position_end"], int): json_file.remove(item)
+        if not isinstance(item["incorrect"], str): json_file.remove(item)
+        if not isinstance(item["fix"], str): item["fix"] = ''
+        if not isinstance(item["reason"], str): item["reason"] = ''
+    # give all the suggestion an index
+    for i in range(len(json_file)):
+        json_file[i]["index"] = i
+    return json_file
