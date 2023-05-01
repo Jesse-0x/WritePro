@@ -1,0 +1,6 @@
+{
+	"dependencies": {
+		"@primer/octicons-react": "^18.3.0",
+		"axios": "^1.4.0"
+	}
+}
