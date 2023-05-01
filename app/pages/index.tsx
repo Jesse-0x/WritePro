@@ -78,6 +78,9 @@ export default function Index() {
       </Head>
       <div className="flex w-full bg-white h-16 drop-shadow-xl mb-6 p-3">
         <Image src="/favicon.png" alt="WritePro Icon" width={42} height={100}/>
+        <span className={"ml-2 text-3xl p-0.5 text-gray-700"}>
+          WritePro
+        </span>
         <div className="flex-grow"/>
         <button className="bg-blue-500 text-white p-2 rounded-lg" onClick={getSuggestion}>
           { buttonContent }
