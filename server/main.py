@@ -16,7 +16,6 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 redis = redis.Redis(host='localhost', port=6379, db=0)
 
 app = fastapi.FastAPI()
-app.mount("/", StaticFiles(directory="public", html=True), name="static")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -93,10 +92,11 @@ def grammar_check(suggestion: Suggestion):
     )
     try:
         result = json.loads(assistant_prompt["choices"][0]["message"]["content"])
+        print(result)
         result = json_check(result)
         if len(result) == 0: return {"error": "The model failed to generate a response. Please try again."}
         if isinstance(result, dict) and {"error"} in result: return result
-    except KeyError:
+    except:
         return {"error": "The model failed to generate a response. Please try again."}
     for item in result:
         redis.rpush(app_id, json.dumps(item))
@@ -177,3 +177,6 @@ def completion(_completion: CompletionModel):
         max_tokens=3999 - token_size,
     )
     return {"result": result['choices'][0]['text']}
+
+
+app.mount("/", StaticFiles(directory="public", html=True), name="static")

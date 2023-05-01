@@ -3,6 +3,7 @@ import Head from "next/head";
 import {getAxios, postAxios} from "@/utils/axios";
 import React, {useState} from "react";
 import Suggestion from "@/components/Suggestion";
+import {wait} from "next/dist/build/output/log";
 
 export default function Index() {
   let [analyzeStatus, setAnalyzeStatus] = useState(false)
@@ -16,7 +17,12 @@ export default function Index() {
     getAxios("/api/app_id", {}).then((data: any) => {
       app_id = data.app_id
     })
+    // wait until the app_id is fetched
+    while (!app_id) {
+        await new Promise(r => setTimeout(r, 500));
+    }
     setAnalyzeStatus(true)
+    // set timeout to 60 seconds
     await postAxios("/api/suggestions", {
       app_id: app_id,
       user_prompt: text
@@ -24,6 +30,9 @@ export default function Index() {
       setSuggestions(data)
       setAnalyzeStatus(false)
     })
+    if (suggestions.length === 1 && suggestions[0].error) {
+        setSuggestions([])
+    }
     suggestions.forEach((suggestion) => {
       const problem_sentence_with_highlight = suggestion.problem_sentence.replace(suggestion.incorrect, `<span class="underline bg-red-300 p-1 rounded-lg">${suggestion.incorrect}</span>`)
       const text = contentEditable?.innerHTML
