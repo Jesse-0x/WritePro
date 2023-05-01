@@ -44,7 +44,7 @@ class CompletionModel(BaseModel):
 
 @app.get("/")
 def read_root():
-    return fastapi.responses.RedirectResponse(url='/index.html')
+    return fastapi.responses.FileResponse('public/index.html')
 
 
 @app.get("/api/app_id")

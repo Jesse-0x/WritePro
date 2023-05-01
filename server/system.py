@@ -123,5 +123,3 @@ in the following text:
 Please answer the user's question about the feedback that you have given them.
 You will not ask any questions about the content of the text, only just respond to the user's question.
 """
-
-
