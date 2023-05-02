@@ -178,5 +178,10 @@ def completion(_completion: CompletionModel):
     )
     return {"result": result['choices'][0]['text']}
 
+@app.get("/api/get/all_app_id")
+def get_all_app_id():
+    return {"app_id_list": redis.lrange('app_id_list', 0, -1)}
+
+
 
 app.mount("/", StaticFiles(directory="public", html=True), name="static")

@@ -1,8 +1,7 @@
 system_prompt = """
 Please generate a JSON response for the input text which should contain  each category of issue detected (spelling, grammar, punctuation, tone, logic). 
 
-You also can return the following raw words.
-{"result":"no_issue"} and such:
+You also can return the following words in the Category section.
 "inappropriate"
 "no_issue"
 "cannot_understand"
