@@ -46,7 +46,7 @@ We are constantly working to improve the accuracy and efficiency of WritePro. In
 
 ## Try it out 🚀
 
-You can try WritePro at [WritePro.herokuapp.com](https://WritePro.herokuapp.com/)
+You can try WritePro at [WaterJourney.tech](https://waterjourney.tech/)
 
 ## License 📜
 
