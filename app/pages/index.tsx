@@ -3,7 +3,6 @@ import Head from "next/head";
 import {getAxios, postAxios} from "@/utils/axios";
 import React, {useState} from "react";
 import Suggestion from "@/components/Suggestion";
-import {wait} from "next/dist/build/output/log";
 
 export default function Index() {
   let [analyzeStatus, setAnalyzeStatus] = useState(false)
@@ -19,7 +18,7 @@ export default function Index() {
     })
     // wait until the app_id is fetched
     while (!app_id) {
-        await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 500));
     }
     setAnalyzeStatus(true)
     // set timeout to 60 seconds
@@ -29,21 +28,21 @@ export default function Index() {
     }).then((data: any) => {
       setSuggestions(data)
       setAnalyzeStatus(false)
-    })
-    if (suggestions.length === 1 && suggestions[0].error) {
+      if (suggestions.length === 1 && suggestions[0].error) {
         setSuggestions([])
-    }
-    suggestions.forEach((suggestion) => {
-      const problem_sentence_with_highlight = suggestion.problem_sentence.replace(suggestion.incorrect, `<span class="underline bg-red-300 p-1 rounded-lg">${suggestion.incorrect}</span>`)
-      const text = contentEditable?.innerHTML
-      // @ts-ignore
-      contentEditable.innerHTML = text.replace(suggestion.problem_sentence, problem_sentence_with_highlight)
-      setContentEditable(contentEditable)
+      }
+      suggestions.forEach((suggestion) => {
+        const problem_sentence_with_highlight = suggestion.problem_sentence.replace(suggestion.incorrect, `<span class="underline bg-red-300 p-1 rounded-lg">${suggestion.incorrect}</span>`)
+        const text = contentEditable?.innerHTML
+        // @ts-ignore
+        contentEditable.innerHTML = text.replace(suggestion.problem_sentence, problem_sentence_with_highlight)
+        setContentEditable(contentEditable)
+      })
     })
   }
 
   function deleteSuggestion(index: number) {
-    suggestions.forEach( suggestion => {
+    suggestions.forEach(suggestion => {
       if (!suggestion) return
       if (suggestion.index === index) {
         setSuggestions(suggestions.slice(suggestions.indexOf(suggestion), 1))
@@ -92,8 +91,8 @@ export default function Index() {
         </span>
         <div className="flex-grow"/>
         <button className="bg-blue-500 text-white p-2 rounded-lg" onClick={getSuggestion}>
-          { buttonContent }
-          { analyzeStatus ? "Analyzing..." : "Analyze" }
+          {buttonContent}
+          {analyzeStatus ? "Analyzing..." : "Analyze"}
         </button>
       </div>
       <div className="grid grid-cols-12">
@@ -112,20 +111,20 @@ export default function Index() {
         <div className="col-span-4 h-max overflow-auto">
           {
             suggestions.map((suggestion, index) => {
-                return (
-                    <Suggestion
-                      key={index}
-                      correctionType={suggestion.category}
-                      content={suggestion.reason}
-                      error={suggestion.incorrect}
-                      fix={suggestion.fix}
-                      index={suggestion.index}
-                      app_id={app_id}
-                      hidden={selection === index}
-                      deleteSuggestion={() => deleteSuggestion(suggestion.index)}
-                      onClick={() => setSelection(index)}
-                    />
-                )
+              return (
+                <Suggestion
+                  key={index}
+                  correctionType={suggestion.category}
+                  content={suggestion.reason}
+                  error={suggestion.incorrect}
+                  fix={suggestion.fix}
+                  index={suggestion.index}
+                  app_id={app_id}
+                  hidden={selection === index}
+                  deleteSuggestion={() => deleteSuggestion(suggestion.index)}
+                  onClick={() => setSelection(index)}
+                />
+              )
             })
           }
         </div>
