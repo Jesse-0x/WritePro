@@ -46,7 +46,8 @@ We are constantly working to improve the accuracy and efficiency of WritePro. In
 
 ## Try it out 🚀
 
-You can try WritePro at [WaterJourney.tech](https://waterjourney.tech/)
+You can try WritePro at ~~here~~ **SERVER TEMPORARY DOWN**
+<!-- [WaterJourney.tech](https://waterjourney.tech/) -->
 
 ## License 📜
 
